@@ -37,7 +37,6 @@ RUN conda config --add channels r && \
     'r-randomforest=4.6*' && conda clean -tipsy
 
 RUN useradd --create-home --home-dir /home/ds --shell /bin/bash ds
-RUN chown -R ds /opt/ds
 RUN adduser ds sudo
 
 RUN mkdir -p /home/ds/.jupyter && echo "c.NotebookApp.token = u''" >> /home/ds/.jupyter/jupyter_notebook_config.py
