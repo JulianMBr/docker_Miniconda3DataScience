@@ -4,11 +4,9 @@ FROM continuumio/miniconda3:latest
 
 # Export env settings
 ENV TERM=xterm
+ENV LANG en_US.UTF-8
 ENV TZ=Europe/Luxembourg
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ENV LANG=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8 \
 
 # R pre-requisites
 RUN apt-get update && \
