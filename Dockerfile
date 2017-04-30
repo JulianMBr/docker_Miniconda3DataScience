@@ -8,35 +8,14 @@ ENV LANG en_US.UTF-8
 ENV TZ=Europe/Luxembourg
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# R pre-requisites
+
+# libav-tools for matplotlib anim
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    fonts-dejavu \
-    gfortran \
-    gcc && apt-get clean && \
+    apt-get install -y --no-install-recommends libav-tools && \
+	fonts-dejavu \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# R packages including IRKernel which gets installed globally.
-RUN conda config --add channels r && \
-    conda install --quiet --yes \
-    'rpy2=2.8*' \
-    'r-base=3.3.2' \
-    'r-irkernel=0.7*' \
-    'r-plyr=1.8*' \
-    'r-devtools=1.12*' \
-    'r-tidyverse=1.0*' \
-    'r-shiny=0.14*' \
-    'r-rmarkdown=1.2*' \
-    'r-forecast=7.3*' \
-    'r-rsqlite=1.1*' \
-    'r-reshape2=1.4*' \
-    'r-nycflights13=0.2*' \
-    'r-caret=6.0*' \
-    'r-rcurl=1.95*' \
-    'r-crayon=1.3*' \
-    'r-randomforest=4.6*' && conda clean -tipsy
-	
-	
 # Install Python 3 packages
 # Remove pyqt and qt pulled in for matplotlib since we're only ever going to
 # use notebook-friendly backends in these images
@@ -70,6 +49,16 @@ RUN conda install --quiet --yes \
 
 # Activate ipywidgets extension in the environment that runs the notebook server
 RUN jupyter nbextension enable --py widgetsnbextension --sys-prefix
+
+RUN ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
+
+ENV XDG_CACHE_HOME /home/$NB_USER/.cache/
+RUN MPLBACKEND=Agg $CONDA_DIR/envs/python2/bin/python -c "import matplotlib.pyplot"
+
+# Configure ipython kernel to use matplotlib inline backend by default
+RUN mkdir -p $HOME/.ipython/profile_default/startup
+COPY mplimporthook.py $HOME/.ipython/profile_default/startup/
+
 
 RUN useradd --create-home --home-dir /home/ds --shell /bin/bash ds
 RUN adduser ds sudo
