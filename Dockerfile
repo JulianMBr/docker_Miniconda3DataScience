@@ -13,9 +13,6 @@ RUN apt-get update -y && apt-get install build-essential -y
 ADD apt-packages.txt /tmp/apt-packages.txt
 RUN xargs -a /tmp/apt-packages.txt apt-get install -y
 
-RUN pip install virtualenv
-RUN /usr/local/bin/virtualenv /opt/ds --distribute --python=/usr/bin/python3
-
 ADD /requirements/ /tmp/requirements
 
 RUN /opt/ds/bin/conda install -r /tmp/requirements/pre-requirements.txt
