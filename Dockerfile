@@ -4,19 +4,39 @@ FROM continuumio/miniconda3:latest
 
 # Export env settings
 ENV TERM=xterm
-ENV LANG en_US.UTF-8
 ENV TZ=Europe/Luxembourg
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8 \
 
-RUN apt-get update -y && apt-get install build-essential -y
+# R pre-requisites
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    fonts-dejavu \
+    gfortran \
+    gcc && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-ADD apt-packages.txt /tmp/apt-packages.txt
-RUN xargs -a /tmp/apt-packages.txt apt-get install -y
-
-ADD /requirements/ /tmp/requirements
-
-RUN /opt/ds/bin/conda install -r /tmp/requirements/pre-requirements.txt
-RUN /opt/ds/bin/conda install -r /tmp/requirements/requirements.txt
+# R packages including IRKernel which gets installed globally.
+RUN conda config --add channels r && \
+    conda install --quiet --yes \
+    'rpy2=2.8*' \
+    'r-base=3.3.2' \
+    'r-irkernel=0.7*' \
+    'r-plyr=1.8*' \
+    'r-devtools=1.12*' \
+    'r-tidyverse=1.0*' \
+    'r-shiny=0.14*' \
+    'r-rmarkdown=1.2*' \
+    'r-forecast=7.3*' \
+    'r-rsqlite=1.1*' \
+    'r-reshape2=1.4*' \
+    'r-nycflights13=0.2*' \
+    'r-caret=6.0*' \
+    'r-rcurl=1.95*' \
+    'r-crayon=1.3*' \
+    'r-randomforest=4.6*' && conda clean -tipsy
 
 RUN useradd --create-home --home-dir /home/ds --shell /bin/bash ds
 RUN chown -R ds /opt/ds
@@ -40,5 +60,13 @@ ENV SHELL=/bin/bash
 ENV USER=ds
 VOLUME /home/ds/notebooks
 WORKDIR /home/ds/notebooks
+
+# We aren't running a GUI, so force matplotlib to use
+# the non-interactive "Agg" backend for graphics.
+# Run matplotlib once to build the font cache.
+ENV MATPLOTLIBRC=${HOME}/.config/matplotlib/matplotlibrc
+RUN mkdir -p ${HOME}/.config/matplotlib && \
+    echo "backend      : Agg" > ${HOME}/.config/matplotlib/matplotlibrc && \
+    python -c "import matplotlib.pyplot"
 
 CMD ["/home/ds/run_ipython.sh"]
