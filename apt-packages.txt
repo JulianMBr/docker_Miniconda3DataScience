@@ -16,8 +16,7 @@ libreadline6
 libreadline6-dev
 build-essential
 curl
-libjpeg8
-libjpeg8-dev
+libjpeg62-turbo-dev
 libfreetype6
 libfreetype6-dev
 zlib1g-dev
