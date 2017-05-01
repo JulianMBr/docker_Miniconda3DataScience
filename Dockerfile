@@ -40,6 +40,7 @@ RUN conda install --quiet --yes \
     'hdf5=1.8.17' \
     'h5py=2.6*' \
     'beautifulsoup4=4.5.*' \
+    'beautifulsoup4=4.5.*' \
 	'basemap=1.*' \
     'xlrd'  && \
     conda remove --quiet --yes --force qt pyqt && \
